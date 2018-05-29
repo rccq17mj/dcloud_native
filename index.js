@@ -1,4 +1,3 @@
-import { AppRegistry } from 'react-native';
-import App from './App';
-
-AppRegistry.registerComponent('dcloud_native', () => App);
+// import { AppRegistry } from 'react-native';
+// import App from './App';
+import "./app/index";
