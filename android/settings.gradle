@@ -1,0 +1,3 @@
+rootProject.name = 'dcloud_native'
+
+include ':app'
