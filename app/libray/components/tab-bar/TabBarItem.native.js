@@ -15,6 +15,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 var react_1 = __importDefault(require("react"));
 var react_native_1 = require("react-native");
+var react_native_2 = require("react-native");
 var TabBarItem = /** @class */ (function (_super) {
     __extends(TabBarItem, _super);
     function TabBarItem() {
@@ -23,23 +24,24 @@ var TabBarItem = /** @class */ (function (_super) {
     TabBarItem.prototype.render = function () {
         var _a = this.props, title = _a.title, selected = _a.selected, tintColor = _a.tintColor, unselectedTintColor = _a.unselectedTintColor, icon = _a.icon, selectedIcon = _a.selectedIcon, onPress = _a.onPress, badge = _a.badge, styles = _a.styles, iconStyle = _a.iconStyle;
         var itemSelectedStyle = selected ? styles.barItemSelected : null;
-        var badgeDom = badge ? (react_1.default.createElement(react_native_1.View, { style: [styles.badge] },
-            react_1.default.createElement(react_native_1.Text, { style: [styles.badgeText] }, badge))) : null;
+        var badgeDom = badge ? (react_1.default.createElement(react_native_2.View, { style: [styles.badge] },
+            react_1.default.createElement(react_native_2.Text, { style: [styles.badgeText] }, badge))) : null;
         // icon
+        var iconWidth = react_native_1.StyleSheet.flatten(styles.barIcon).width;
         var source = selected && selectedIcon !== undefined
             ? selectedIcon
             : icon !== undefined ? icon : null;
-        var selectedColor = selected && selectedIcon !== undefined ? { color: tintColor, fontSize: '100%' } : { fontSize: '100%' };
-        var iconSource = react_1.default.isValidElement(source) ? react_1.default.createElement(react_native_1.Text, { style: [styles.barIcon, iconStyle, source.props.style, selectedColor] }, source.props.children) : source === null ? null : (react_1.default.createElement(react_native_1.Image, { source: source, style: [styles.barIcon, iconStyle] }));
-        if (react_1.default.isValidElement(source)) {
-            console.log(source.props);
-        }
-        return (react_1.default.createElement(react_native_1.TouchableWithoutFeedback, { onPress: onPress },
-            react_1.default.createElement(react_native_1.View, { style: [styles.barItem, itemSelectedStyle] },
-                react_1.default.createElement(react_native_1.View, null,
+        var selectedColor = selected && selectedIcon !== undefined ? { color: tintColor, fontSize: iconWidth } : { fontSize: iconWidth };
+        var iconSource = source === null ? null : react_1.default.isValidElement(source) ? react_1.default.createElement(react_native_2.Text, { style: [styles.barIcon, iconStyle, icon.props.style, selectedColor] }, icon.props.children) : (react_1.default.createElement(react_native_2.Image, { source: source, style: [styles.barIcon, iconStyle] }));
+        // if(React.isValidElement(source)) {
+        //     console.log(StyleSheet.flatten(styles.barIcon));
+        // }
+        return (react_1.default.createElement(react_native_2.TouchableWithoutFeedback, { onPress: onPress },
+            react_1.default.createElement(react_native_2.View, { style: [styles.barItem, itemSelectedStyle] },
+                react_1.default.createElement(react_native_2.View, null,
                     iconSource,
                     badgeDom),
-                react_1.default.createElement(react_native_1.Text, { style: [
+                react_1.default.createElement(react_native_2.Text, { style: [
                         styles.barItemTitle,
                         { color: selected ? tintColor : unselectedTintColor },
                     ] }, title))));

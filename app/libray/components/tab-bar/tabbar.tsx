@@ -6,6 +6,7 @@ import TabBarItem from './TabBarItem.native';
 
 export interface TabBarNativeProps extends TabBarProps {
     styles?: ITabBarStyle;
+    getStyle: any
 }
 
 const TabBarStyles = StyleSheet.create<any>(TabBarStyle);
@@ -18,11 +19,14 @@ class TabBar extends React.Component<TabBarNativeProps, any> {
         unselectedTintColor: '#888',
         styles: TabBarStyles,
     };
-
+    componentDidMount() {
+        this.props.getStyle( this.props.styles.tabs);
+    }
     static Item: any;
     getPanes(content: boolean) {
         const { tintColor, unselectedTintColor, children } = this.props;
         const styles = this.props.styles!;
+
         // ios 规则： selected 为多个则只选中最后一个， selected 为 0 个则选中第一个;
         let selectedIndex = 0;
         [].concat(children as any).forEach((child: any, idx: number) => {

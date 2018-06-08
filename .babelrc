@@ -1,6 +1,7 @@
 {
   "plugins": [
-    ["import", { "libraryName": "antd-mobile" }]
+    ["import", { "libraryName": "antd-mobile" }],
+    ["transform-decorators-legacy"]
   ],
   "presets": ["react-native"]
 }
