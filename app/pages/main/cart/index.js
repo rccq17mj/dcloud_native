@@ -1,22 +1,42 @@
 import React, { Component } from 'react';
-import {
-    View,Text
-} from 'react-native';
-import { connect } from 'react-redux';
+import {View,Text} from 'react-native';
+import  {TabBarExample}  from 'dcloud-mobile';
 
-@connect(  router => ({ ...router }), {login: () => (({ type: 'router/login' }))})
+import  ChildCart  from '../../cart/';
+
+const tab = [
+    {
+        title: "cart1",
+        icon:<Text style={{fontFamily:'iconfont'}}>&#xe628;</Text>,
+        selectedIcon:<Text style={{fontFamily:'iconfont'}}>&#xe628;</Text>,
+        path: "cart1",
+        screen:  <ChildCart></ChildCart>,
+        badge: 0
+    },
+    {
+        title: "cart2",
+        icon:<Text style={{fontFamily:'iconfont'}}>&#xe628;</Text>,
+        selectedIcon:<Text style={{fontFamily:'iconfont'}}>&#xe628;</Text>,
+        path: "cart2",
+        screen:  <ChildCart></ChildCart>,
+        badge: 2
+    },
+    {
+        title: "cart3",
+        icon:<Text style={{fontFamily:'iconfont'}}>&#xe628;</Text>,
+        selectedIcon:<Text style={{fontFamily:'iconfont'}}>&#xe628;</Text>,
+        path: "cart3",
+        screen:  <ChildCart></ChildCart>,
+        badge: 0
+    }
+]
+
 export default class Cart extends Component {
     constructor(props) {
         super(props);
-        console.log(this.props);
     }
 
     render() {
-        console.log('home');
-        return (
-            <View style={{flex: 1, alignItems: 'center', justifyContent: 'center'}}>
-                <Text>Cart</Text>
-            </View>
-        )
+        return (<TabBarExample tab={tab}></TabBarExample>)
     }
 }

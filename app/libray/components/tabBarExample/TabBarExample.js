@@ -1,33 +1,67 @@
 import React, { Component } from 'react';
-import {StyleSheet, View,Dimensions,StatusBar} from 'react-native';
+import {StyleSheet, View,Dimensions,StatusBar,Text } from 'react-native';
 import PropTypes from  'prop-types';
-import  {TabBar}  from 'dcloud-mobile';
-import {NavigationService} from 'dcloud-utils';
+import  {TabBar, NavigationRoute}  from 'dcloud-mobile';
+import { NavigationActions,createStackNavigator } from 'react-navigation';
 
 const {height:ScreenHeight} = Dimensions.get("window")
 
 export default class TabBarExample extends Component {
     constructor(props) {
         super(props);
+
+        let routeList = {};
+        this.props.tab.map((item)=>{
+            if(item.screen){
+                const key = item.path;
+                routeList[key] = {
+                    screen: NavigationRoute,
+                    navigationOptions: item.navigationOptions? item.navigationOptions : {header:null,  tabBarVisible: false}
+                }
+            }
+        });
         this.state = {
-            selectedTab: this.props.tab[0].key,
+            selectedTab: this.props.tab[0].path,
             hidden: this.props.hidden?this.props.hidden : false,
             fullScreen: false,
-            style: {
-                height: 0
-            }
+            navigatorStyle:this.props.navigatorStyle? this.props.navigatorStyle : {height: 0},
+            styleBuff: null,
+            navigator: Object.keys(routeList)? createStackNavigator(routeList, {
+                    ...this.props.StackNavigatorConfigs,
+                    ...{initialRouteParams: {
+                        page: this.props.tab[0].screen? this.props.tab[0].screen : null , back: this.returning.bind(this)
+                    }}
+            }) : null,
+            _navigator: null
         };
     }
 
+
     getTabBarStyle(style) {
-        const tabstye = StyleSheet.flatten(style);
-        console.log(ScreenHeight);
-        this.state.style.height = tabstye.height;
-        this.setState({style: {
-            height: ScreenHeight- StatusBar.currentHeight - tabstye.height
-        }});
+        if(this.state.navigatorStyle.height == 0) {
+            const tabstye = StyleSheet.flatten(style);
+            this.setState({
+                navigatorStyle: {
+                    height: ScreenHeight - StatusBar.currentHeight - tabstye.height
+                },
+                styleBuff: {height: ScreenHeight - StatusBar.currentHeight - tabstye.height}
+            });
+        }
+    }
 
 
+    setTopLevelNavigator(navigatorRef) {
+        this.state._navigator = navigatorRef;
+    }
+
+
+    navigate(routeName, params) {
+        this.state._navigator.dispatch(
+            NavigationActions.navigate({
+                routeName,
+                params,
+            })
+        );
     }
 
     getTabBar() {
@@ -35,27 +69,38 @@ export default class TabBarExample extends Component {
             return (
                 <TabBar.Item
                     title={item.title}
-                    key={item.key}
+                    key={item.path}
                     icon={item.icon}
                     selectedIcon={item.selectedIcon}
-                    selected={this.state.selectedTab === item.key}
+                    selected={this.state.selectedTab === item.path}
                     onPress={() => {
-                        this.setState({selectedTab: item.key});
-                        if(this.props.Navigator && item.path && item.path!=''){
-                            NavigationService.navigate(item.path);
+                        this.setState({selectedTab: item.path});
+                        if(item.screen && item.path && item.path!=''){
+                            if(item.childRoute){
+                                this.setState({navigatorStyle : {...this.state.navigatorStyle,...{height:'100%'}}});
+                            }
+                            this.navigate(item.path,{page: item.screen,back: this.returning.bind(this)});
                         }
                     }}
                     data-seed="logId"
                 >
+                    {item.component? item.component : null}
                 </TabBar.Item>
             )
         })
     }
 
+    //Event
+    //返回事件（这里还应包含ios的返回事件）
+    returning(navigation) {
+        this.setState({selectedTab: navigation.state.routeName});
+        this.setState({navigatorStyle : {...this.navigatorStyle,...this.state.styleBuff}});
+    }
+
     render() {
-        const {style} = this.state
+        const {style} = this.state;
         return (
-            <View style={{flex:1,width:"100%",height:"100%"}}>
+            <View style={{width:"100%",height:"100%"}}>
                 <StatusBar
                     hidden={false} //是否隐藏状态栏。
                     animated={true} //是否需要动画效果
@@ -63,12 +108,16 @@ export default class TabBarExample extends Component {
                     // backgroundColor={'red'} // android 平台，设置状态栏配背景颜色
                     barStyle={'default'} //可以取值 'default', 'light-content', 'dark-content'它的默认是default,
                 />
-                <View style={{height:this.state.style.height}}>
-                    {this.props.Navigator? this.props.Navigator : null}
+                {/*<View style={{...this.state.navigatorStyle}}>*/}
+                <View style={{width:"100%",position:'absolute',bottom:0}}>
+                    <TabBar unselectedTintColor="#949494" tintColor="#33A3F4" barTintColor="white" hidden={this.state.hidden} getStyle={this.getTabBarStyle.bind(this)}>
+                        {this.getTabBar()}
+                    </TabBar>
                 </View>
-                <TabBar unselectedTintColor="#949494" tintColor="#33A3F4" barTintColor="white" hidden={this.state.hidden} getStyle={this.getTabBarStyle.bind(this)}>
-                    {this.getTabBar()}
-                </TabBar>
+                {this.state.navigator? (
+                    <View style={this.state.navigatorStyle}>
+                        <this.state.navigator  ref={navigatorRef => {this.setTopLevelNavigator(navigatorRef)}} />
+                    </View>) : null}
             </View>
         )
     }
@@ -101,14 +150,19 @@ TabBarExample.propTypes = {
         ]),
         // 路由名称
         path: PropTypes.string,
-        // 渲染页面,必须使用component: <element></element> 格式
+        // 渲染组件,必须使用component: <element></element> 格式,如果使用组件模式则screen参数无效
         component: PropTypes.element,
-        // 唯一码
-        key: PropTypes.string.isRequired,
+        // 渲染页面,Navigator路由页面模式screen: <element></element>
+        screen: PropTypes.element,
+        // 路由模式为screens时设置路由参数
+        navigationOptions: PropTypes.object,
         // 消息提醒（数字）
         badge: PropTypes.number,
+        // 是否拥有子路由，默认false,设置后可隐藏主路由的导航栏以便子路由使用
+        childRoute: PropTypes.bool
     }],
-    // 可选，传入一个Navigator对象则使用路由模式
-    Navigator:  PropTypes.element,
-    navigationService: PropTypes.object
+    // Navigator配置项传入一组配置
+    StackNavigatorConfigs: PropTypes.object,
+    // 视图区域的样式
+    navigatorStyle: PropTypes.object
 }

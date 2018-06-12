@@ -5,7 +5,7 @@
  */
 import React, { Component } from 'react';
 import { AppRegistry } from 'react-native';
-import {Main, Router} from './pages';
+import { Layout , Router} from './pages';
 import {dva} from "dcloud-utils";
 import {
     createReduxBoundAddListener,
@@ -31,5 +31,5 @@ const app = dva({
 AppRegistry.registerComponent('dcloud_native', () => App);
 
 
-const App = app.start(<Main />);
+const App = app.start(<Layout />);
 export default {App, addListener};

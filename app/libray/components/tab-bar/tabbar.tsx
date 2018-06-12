@@ -36,18 +36,23 @@ class TabBar extends React.Component<TabBarNativeProps, any> {
         });
         const newChildren: any[] = [];
         React.Children.map(children, (child: any, idx) => {
+
             if (content) {
-                newChildren.push(
-                    <View
-                        key={idx}
-            style={[
-                styles.contentItem,
-                idx === selectedIndex ? styles.contentItemSelected : undefined,
-            ]}
-            >
-            {child.props.children}
-            </View>,
-            );
+                // if(child.props.children){
+                    newChildren.push(
+                        <View
+                            key={idx}
+                            style={[
+                                styles.contentItem,
+                                idx === selectedIndex ? styles.contentItemSelected : undefined,
+                            ]}
+                        >
+                            {child.props.children}
+                        </View>,
+                    );
+                // }else{
+                //     newChildren.push(<View></View>);
+                // }
             } else {
                 newChildren.push(
                     React.cloneElement(child, {

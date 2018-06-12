@@ -39,10 +39,14 @@ var TabBar = /** @class */ (function (_super) {
         var newChildren = [];
         react_1.default.Children.map(children, function (child, idx) {
             if (content) {
+                // if(child.props.children){
                 newChildren.push(react_1.default.createElement(react_native_1.View, { key: idx, style: [
                         styles.contentItem,
                         idx === selectedIndex ? styles.contentItemSelected : undefined,
                     ] }, child.props.children));
+                // }else{
+                //     newChildren.push(<View></View>);
+                // }
             }
             else {
                 newChildren.push(react_1.default.cloneElement(child, {
