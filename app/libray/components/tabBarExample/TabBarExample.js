@@ -32,10 +32,11 @@ export default class TabBarExample extends Component {
                         page: this.props.tab[0].screen? this.props.tab[0].screen : null , back: this.returning.bind(this)
                     }}
             }) : null,
-            _navigator: null
-        };
+            _navigator: null,
+            current: this.props.tab[0]
+         };
+        this.state.waiting = true;
     }
-
 
     getTabBarStyle(style) {
         if(this.state.navigatorStyle.height == 0) {
@@ -49,11 +50,9 @@ export default class TabBarExample extends Component {
         }
     }
 
-
     setTopLevelNavigator(navigatorRef) {
         this.state._navigator = navigatorRef;
     }
-
 
     navigate(routeName, params) {
         this.state._navigator.dispatch(
@@ -77,8 +76,11 @@ export default class TabBarExample extends Component {
                         this.setState({selectedTab: item.path});
                         if(item.screen && item.path && item.path!=''){
                             if(item.childRoute){
-                                this.setState({navigatorStyle : {...this.state.navigatorStyle,...{height:'100%'}}});
-                            }
+                                this.setState({
+                                    navigatorStyle : {...this.state.navigatorStyle,...{height:'100%'}}
+                                });
+                            }else
+                                this.state.current = item;
                             this.navigate(item.path,{page: item.screen,back: this.returning.bind(this)});
                         }
                     }}
@@ -90,11 +92,24 @@ export default class TabBarExample extends Component {
         })
     }
 
+    getItem(key) {
+        let item;
+        for(_item in this.props.tab){
+            if(key === this.props.tab[_item].path){
+                item = this.props.tab[_item];
+                return true;
+            }
+        }
+        return item;
+    }
+
     //Event
-    //返回事件（这里还应包含ios的返回事件）
+    //返回事件当前层级下（这里还应包含ios的返回事件）
     returning(navigation) {
         this.setState({selectedTab: navigation.state.routeName});
-        this.setState({navigatorStyle : {...this.navigatorStyle,...this.state.styleBuff}});
+        if(navigation.state.routeName === this.state.current.path.toString() ){
+            this.setState({navigatorStyle: {...this.navigatorStyle, ...this.state.styleBuff}});
+        }
     }
 
     render() {

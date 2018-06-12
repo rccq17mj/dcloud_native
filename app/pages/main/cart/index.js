@@ -10,7 +10,7 @@ const tab = [
         icon:<Text style={{fontFamily:'iconfont'}}>&#xe628;</Text>,
         selectedIcon:<Text style={{fontFamily:'iconfont'}}>&#xe628;</Text>,
         path: "cart1",
-        screen:  <ChildCart></ChildCart>,
+        screen:  <Text>Cart</Text>,
         badge: 0
     },
     {
@@ -18,16 +18,17 @@ const tab = [
         icon:<Text style={{fontFamily:'iconfont'}}>&#xe628;</Text>,
         selectedIcon:<Text style={{fontFamily:'iconfont'}}>&#xe628;</Text>,
         path: "cart2",
-        screen:  <ChildCart></ChildCart>,
-        badge: 2
+        screen:  <Text>Cart2</Text>,
+        badge: 2,
     },
     {
         title: "cart3",
         icon:<Text style={{fontFamily:'iconfont'}}>&#xe628;</Text>,
         selectedIcon:<Text style={{fontFamily:'iconfont'}}>&#xe628;</Text>,
         path: "cart3",
-        screen:  <ChildCart></ChildCart>,
-        badge: 0
+        screen:   <ChildCart></ChildCart>,
+        badge: 0,
+        childRoute:true
     }
 ]
 
