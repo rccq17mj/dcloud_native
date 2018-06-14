@@ -5,9 +5,18 @@ export default class NavigationRoute extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            screen: this.props.navigation.state.params? this.props.navigation.state.params.page : null,
-            back:  this.props.navigation.state.params? this.props.navigation.state.params.back : null,
+            screen: this.getparams().page,
+            back:  this.getparams().back,
             listener: null,
+        }
+        //参数下钻
+        this.state.screen = React.cloneElement(this.state.screen,{navigation: this.props.navigation,params: this.props.navigation.state.params});
+    }
+
+    getparams() {
+        return this.props.navigation.state.params? this.props.navigation.state.params: {
+            page: null,
+            back: null,
         }
     }
 

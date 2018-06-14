@@ -37,7 +37,11 @@ export default class Cart extends Component {
         super(props);
     }
 
+    setNavigator(navigator) {
+        this.props.initCart(navigator);
+    }
+
     render() {
-        return (<TabBarExample tab={tab}></TabBarExample>)
+        return (<TabBarExample tab={tab} navigator={this.setNavigator.bind(this)} ></TabBarExample>)
     }
 }

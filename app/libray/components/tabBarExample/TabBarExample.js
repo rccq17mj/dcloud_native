@@ -4,7 +4,7 @@ import PropTypes from  'prop-types';
 import  {TabBar, NavigationRoute}  from 'dcloud-mobile';
 import { NavigationActions,createStackNavigator } from 'react-navigation';
 
-const {height:ScreenHeight} = Dimensions.get("window")
+const {height:ScreenHeight} = Dimensions.get("window");
 
 export default class TabBarExample extends Component {
     constructor(props) {
@@ -20,17 +20,19 @@ export default class TabBarExample extends Component {
                 }
             }
         });
+        const routeParams = {
+           back: this.returning.bind(this)
+        }
         this.state = {
             selectedTab: this.props.tab[0].path,
             hidden: this.props.hidden?this.props.hidden : false,
             fullScreen: false,
             navigatorStyle:this.props.navigatorStyle? this.props.navigatorStyle : {height: 0},
             styleBuff: null,
+            routeParams: routeParams,
             navigator: Object.keys(routeList)? createStackNavigator(routeList, {
                     ...this.props.StackNavigatorConfigs,
-                    ...{initialRouteParams: {
-                        page: this.props.tab[0].screen? this.props.tab[0].screen : null , back: this.returning.bind(this)
-                    }}
+                    ...{initialRouteParams: {...routeParams,...{page: this.props.tab[0].screen? this.props.tab[0].screen : null}}}
             }) : null,
             _navigator: null,
             current: this.props.tab[0]
@@ -55,12 +57,22 @@ export default class TabBarExample extends Component {
     }
 
     navigate(routeName, params) {
+        let item = this.getItem(routeName);
+        if(item.childRoute){
+            this.setState({
+                navigatorStyle : {...this.state.navigatorStyle,...{height:'100%'}}
+            });
+        }else
+            this.state.current = item;
+
+        params = {...params,...this.state.routeParams, ...{page: item.screen}};
         this.state._navigator.dispatch(
             NavigationActions.navigate({
                 routeName,
                 params,
             })
         );
+        return item;
     }
 
     getTabBar() {
@@ -72,20 +84,8 @@ export default class TabBarExample extends Component {
                     icon={item.icon}
                     selectedIcon={item.selectedIcon}
                     selected={this.state.selectedTab === item.path}
-                    onPress={() => {
-                        this.setState({selectedTab: item.path});
-                        if(item.screen && item.path && item.path!=''){
-                            if(item.childRoute){
-                                this.setState({
-                                    navigatorStyle : {...this.state.navigatorStyle,...{height:'100%'}}
-                                });
-                            }else
-                                this.state.current = item;
-                            this.navigate(item.path,{page: item.screen,back: this.returning.bind(this)});
-                        }
-                    }}
-                    data-seed="logId"
-                >
+                    onPress={() => {this.navigate(item.path)}}
+                    data-seed="logId">
                     {item.component? item.component : null}
                 </TabBar.Item>
             )
@@ -97,10 +97,10 @@ export default class TabBarExample extends Component {
         for(_item in this.props.tab){
             if(key === this.props.tab[_item].path){
                 item = this.props.tab[_item];
-                return true;
+                return item;
             }
         }
-        return item;
+        return {screen: null}
     }
 
     //Event
@@ -110,6 +110,13 @@ export default class TabBarExample extends Component {
         if(navigation.state.routeName === this.state.current.path.toString() ){
             this.setState({navigatorStyle: {...this.navigatorStyle, ...this.state.styleBuff}});
         }
+    }
+
+    // 初始化路由完成
+    componentDidMount() {
+        // 将navigator给父组件
+        if(this.props.navigator && typeof(this.props.navigator) === 'function')
+            this.props.navigator(this.navigate.bind(this));
     }
 
     render() {
@@ -137,7 +144,6 @@ export default class TabBarExample extends Component {
         )
     }
 }
-
 
 
 TabBarExample.propTypes = {
@@ -179,5 +185,8 @@ TabBarExample.propTypes = {
     // Navigator配置项传入一组配置
     StackNavigatorConfigs: PropTypes.object,
     // 视图区域的样式
-    navigatorStyle: PropTypes.object
+    navigatorStyle: PropTypes.object,
+    // 可获取到navigator对象  navigator={this.setNavigator.bind(this)}
+    // 父组件componentDidUpdate()中完成跳转操作
+    navigator: PropTypes.func
 }
