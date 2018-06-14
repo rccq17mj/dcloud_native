@@ -6,7 +6,7 @@ import { NavigationActions,createStackNavigator } from 'react-navigation';
 
 const {height:ScreenHeight} = Dimensions.get("window");
 
-export default class TabBarExample extends Component {
+export default class TabRoute extends Component {
     constructor(props) {
         super(props);
 
@@ -58,7 +58,8 @@ export default class TabBarExample extends Component {
 
     navigate(routeName, params) {
         let item = this.getItem(routeName);
-        if(item.childRoute){
+
+        if(item.childRoute || item.screen.type.displayName === 'TabRoute'){
             this.setState({
                 navigatorStyle : {...this.state.navigatorStyle,...{height:'100%'}}
             });
@@ -85,6 +86,7 @@ export default class TabBarExample extends Component {
                     selectedIcon={item.selectedIcon}
                     selected={this.state.selectedTab === item.path}
                     onPress={() => {this.navigate(item.path)}}
+                    badge={item.badge}
                     data-seed="logId">
                     {item.component? item.component : null}
                 </TabBar.Item>
@@ -146,7 +148,7 @@ export default class TabBarExample extends Component {
 }
 
 
-TabBarExample.propTypes = {
+TabRoute.propTypes = {
     // 传入一组tab
     tab:[{
         // 菜单名
@@ -179,7 +181,7 @@ TabBarExample.propTypes = {
         navigationOptions: PropTypes.object,
         // 消息提醒（数字）
         badge: PropTypes.number,
-        // 是否拥有子路由，默认false,设置后可隐藏主路由的导航栏以便子路由使用
+        // 是否全屏显示,隐藏路由tab,一般有子路由存在时设置成true
         childRoute: PropTypes.bool
     }],
     // Navigator配置项传入一组配置
