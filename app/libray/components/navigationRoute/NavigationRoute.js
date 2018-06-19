@@ -8,7 +8,9 @@ export default class NavigationRoute extends Component {
             screen: this.getparams().page,
             back:  this.getparams().back,
             listener: null,
+            setNavigate: this.getparams().setNavigate,
         }
+
         //参数下钻
         this.state.screen = React.cloneElement(this.state.screen,{navigation: this.props.navigation,params: this.props.navigation.state.params});
     }
@@ -17,20 +19,22 @@ export default class NavigationRoute extends Component {
         return this.props.navigation.state.params? this.props.navigation.state.params: {
             page: null,
             back: null,
+            setNavigate: null
         }
     }
 
     componentWillMount(){
+        this.state.setNavigate(this.props.navigation);
         this.state.listener = this.props.navigation.addListener('didFocus',()=>{
-            this.onBackButtonPressAndroid();
-        })
+            this.onBack();
+        });
     }
 
     componentWillUnmount(){
         this.state.listener.remove();
     }
 
-    onBackButtonPressAndroid (){
+    onBack (){
         if(this.state.back)
             this.state.back(this.props.navigation)
     }

@@ -11,6 +11,7 @@ export default class Layout extends Component {
     constructor(props) {
         super(props);
 
+
         const cart = [
             {
                 title: "cart1",
@@ -77,6 +78,6 @@ export default class Layout extends Component {
     }
 
     render() {
-        return (<TabRoute tab={this.state.tab} navigator={this.setNavigator.bind(this)} ></TabRoute>)
+        return (<TabRoute tab={this.state.tab} navigator={this.setNavigator.bind(this)}></TabRoute>)
     }
 }
