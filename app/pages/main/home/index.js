@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import {
-    StyleSheet, View,Text
+    StyleSheet, View,Dimensions,Image
 } from 'react-native';
 
 import { connect } from 'react-redux';
@@ -15,7 +15,7 @@ export default class Home extends Component {
     render() {
         return (
             <View style={{flex: 1, alignItems: 'center', justifyContent: 'center'}}>
-                <Text>Home</Text>
+                <Image style={{width: 100, height: 100}} source={require('assets/images/logo.png')} />
             </View>
         )
     }

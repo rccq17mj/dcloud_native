@@ -78,6 +78,6 @@ export default class Layout extends Component {
     }
 
     render() {
-        return (<TabRoute tab={this.state.tab} navigator={this.setNavigator.bind(this)}></TabRoute>)
+        return (<TabRoute navBar={null} tab={this.state.tab} navigator={this.setNavigator.bind(this)}></TabRoute>)
     }
 }
