@@ -1,8 +1,9 @@
 import React from 'react';
 import { StyleSheet, View } from 'react-native';
 import { TabBarProps } from './PropsType';
-import TabBarStyle, { ITabBarStyle } from 'antd-mobile/lib/tab-bar/style/index.native';
+import TabBarStyle, { ITabBarStyle } from './style/index.native';
 import TabBarItem from './TabBarItem.native';
+import variables from 'antd-mobile-rn/lib/style/themes/default.native';
 
 export interface TabBarNativeProps extends TabBarProps {
     styles?: ITabBarStyle;
@@ -15,7 +16,7 @@ class TabBar extends React.Component<TabBarNativeProps, any> {
     props: TabBarNativeProps;
     static defaultProps = {
         barTintColor: 'white',
-        tintColor: '#108ee9',
+        tintColor: variables.brand_primary,
         unselectedTintColor: '#888',
         styles: TabBarStyles,
     };

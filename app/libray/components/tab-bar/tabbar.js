@@ -15,8 +15,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 var react_1 = __importDefault(require("react"));
 var react_native_1 = require("react-native");
-var index_native_1 = __importDefault(require("antd-mobile/lib/tab-bar/style/index.native"));
+var index_native_1 = __importDefault(require("./style/index.native"));
 var TabBarItem_native_1 = __importDefault(require("./TabBarItem.native"));
+var default_native_1 = __importDefault(require("antd-mobile-rn/lib/style/themes/default.native"));
 var TabBarStyles = react_native_1.StyleSheet.create(index_native_1.default);
 var TabBar = /** @class */ (function (_super) {
     __extends(TabBar, _super);
@@ -67,7 +68,7 @@ var TabBar = /** @class */ (function (_super) {
     };
     TabBar.defaultProps = {
         barTintColor: 'white',
-        tintColor: '#108ee9',
+        tintColor: default_native_1.default.brand_primary,
         unselectedTintColor: '#888',
         styles: TabBarStyles,
     };

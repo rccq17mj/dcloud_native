@@ -11,7 +11,6 @@ export default class Layout extends Component {
     constructor(props) {
         super(props);
 
-
         const cart = [
             {
                 title: "cart1",

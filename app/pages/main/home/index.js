@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
-import {
-    StyleSheet, View,Dimensions,Image
-} from 'react-native';
+import {StyleSheet, View,Dimensions,Image} from 'react-native';
+import {Button , WhiteSpace} from 'antd-mobile-rn';
 
 import { connect } from 'react-redux';
 

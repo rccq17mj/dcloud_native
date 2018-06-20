@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import PropTypes from  'prop-types';
-import TabBarStyle from 'antd-mobile/lib/tab-bar/style/index.native';
-import { View,Text, StyleSheet , TouchableWithoutFeedback } from 'react-native';
+import TabBarStyle from 'antd-mobile-rn/lib/tab-bar/style/index.native';
+import { View,Text, StyleSheet , TouchableOpacity } from 'react-native';
 
 const NavBarStyles = StyleSheet.create(TabBarStyle);
 const styles = StyleSheet.create({
@@ -17,7 +17,6 @@ const styles = StyleSheet.create({
 export default class NavBar extends Component {
     constructor(props) {
         super(props);
-        console.log(props);
         this.state = {
             styles: {
                 ...StyleSheet.flatten(NavBarStyles.tabs),
@@ -35,11 +34,11 @@ export default class NavBar extends Component {
     render() {
         return (
             <View style={{...this.state.styles, ...{alignItems: 'center', width:'100%'}}}>
-                <TouchableWithoutFeedback style={{width: StyleSheet.flatten(NavBarStyles.barIcon).width + 20 , height: '100%'}} onPress={this.props.touchBack? this.props.touchBack.bind(this) : this.reback.bind(this)}>
+                <TouchableOpacity style={{width: StyleSheet.flatten(NavBarStyles.barIcon).width + 20 , height: '100%'}} onPress={this.props.touchBack? this.props.touchBack.bind(this) : this.reback.bind(this)}>
                     <View style={{position:'absolute', left: 10, height: '100%',  flex:1, justifyContent: 'center',  alignItems:'center',}}>
                         <Text style={{fontFamily:'iconfont', fontSize: StyleSheet.flatten(NavBarStyles.barIcon).width}}>&#xe697;</Text>
                     </View>
-                </TouchableWithoutFeedback>
+                </TouchableOpacity>
                 <View style={styles.container}>
                     <Text style={{textAlign:'center',  justifyContent: 'center',width:200}}>{this.props.title? this.props.title : ''}</Text>
                 </View>

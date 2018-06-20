@@ -47,6 +47,7 @@ export default class TabBarItem extends React.Component<TabBarItemProps, any> {
             styles,
             iconStyle,
         } = this.props;
+
         const itemSelectedStyle = selected ? styles.barItemSelected : null;
         const badgeDom = badge ? (
             <View style={[styles.badge]}>

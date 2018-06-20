@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import {View } from 'react-native';
+import {View,BackHandler } from 'react-native';
 
 export default class NavigationRoute extends Component {
     constructor(props) {
@@ -8,7 +8,10 @@ export default class NavigationRoute extends Component {
             screen: this.getparams().page,
             back:  this.getparams().back,
             listener: null,
+            hardwareBackPress: null,
             setNavigate: this.getparams().setNavigate,
+            childInit: this.getparams().childInit,
+            navigatorLoding: this.getparams().navigatorLoding
         }
 
         //参数下钻
@@ -19,7 +22,17 @@ export default class NavigationRoute extends Component {
         return this.props.navigation.state.params? this.props.navigation.state.params: {
             page: null,
             back: null,
-            setNavigate: null
+            setNavigate: null,
+            childInit: null,
+            navigatorLoding: null
+        }
+    }
+
+    componentDidMount(){
+        if(this.state.childInit){
+            setTimeout(()=>{
+                this.state.childInit();
+            },500)
         }
     }
 
@@ -28,10 +41,21 @@ export default class NavigationRoute extends Component {
         this.state.listener = this.props.navigation.addListener('didFocus',()=>{
             this.onBack();
         });
+
+        this.state.hardwareBackPress = BackHandler.addEventListener('hardwareBackPress',()=>{
+            if(this.state.navigatorLoding){
+                if(!this.state.navigatorLoding())
+                    return true;
+                else
+                    return false;
+            }
+            return false;
+        });
     }
 
     componentWillUnmount(){
         this.state.listener.remove();
+        this.state.hardwareBackPress.remove();
     }
 
     onBack (){
