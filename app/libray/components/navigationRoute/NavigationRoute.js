@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import {View,BackHandler } from 'react-native';
+import  {ActivityIndicator}  from 'antd-mobile-rn';
 
 export default class NavigationRoute extends Component {
     constructor(props) {
@@ -13,11 +14,29 @@ export default class NavigationRoute extends Component {
             hardwareBackPress: null,
             setNavigate: this.getparams().setNavigate,
             childInit: this.getparams().childInit,
-            navigatorLoding: this.getparams().navigatorLoding
+            navigatorLoading: this.getparams().navigatorLoading,
+            Loading: true
         }
 
         //参数下钻
         this.state.screen = React.cloneElement(this.state.screen,{navigation: this.props.navigation,params: this.props.navigation.state.params});
+
+        this.state.hardwareBackPress = BackHandler.addEventListener('hardwareBackPress',()=>{
+            if(this.state.navigatorLoading){
+                if(!this.state.navigatorLoading())
+                    return true;
+                else {
+                    this.state.back(this.props.navigation,this.state.title,this.state.Loading);
+                    return false;
+                }
+            }
+            return true;
+        });
+
+        this.state.setNavigate(this.props.navigation);
+        this.state.listener = this.props.navigation.addListener('willFocus',()=>{
+            this.onBack();
+        });
     }
 
     getparams() {
@@ -26,36 +45,21 @@ export default class NavigationRoute extends Component {
             back: null,
             setNavigate: null,
             childInit: null,
-            navigatorLoding: null,
+            navigatorLoading: null,
             title: null,
-            backDelay: 500
+            backDelay: 1000,
+            Loading: null,
         }
     }
 
     componentDidMount(){
-        if(this.state.childInit){
-            setTimeout(()=>{
+        setTimeout(()=>{
+            if(this.state.childInit)
                 this.state.childInit();
-            },this.state.backDelay);
-        }
+        },this.state.backDelay);
     }
 
-    componentWillMount(){
-        this.state.setNavigate(this.props.navigation);
-        this.state.listener = this.props.navigation.addListener('didFocus',()=>{
-            this.onBack();
-        });
-
-        this.state.hardwareBackPress = BackHandler.addEventListener('hardwareBackPress',()=>{
-            if(this.state.navigatorLoding){
-                if(!this.state.navigatorLoding())
-                    return true;
-                else
-                    return false;
-            }
-            return false;
-        });
-    }
+    componentWillMount(){}
 
     componentWillUnmount(){
         this.state.listener.remove();
@@ -64,13 +68,22 @@ export default class NavigationRoute extends Component {
 
     onBack (){
         if(this.state.back)
-            this.state.back(this.props.navigation,this.state.title)
+            this.state.back(this.props.navigation,this.state.title,false)
     }
 
     render() {
         return (
             <View style={{flex:1,width:'100%',height:'100%'}}>
-                {this.state.screen? this.state.screen : null}
+                {/*<View  style={this.state.Loading? {width:'100%',height:'100%'} :  {width: 0 , height: 0}}>*/}
+                    {/*<ActivityIndicator*/}
+                        {/*animating={this.state.Loading}*/}
+                        {/*toast*/}
+                        {/*color="#efefef"*/}
+                        {/*size="large"*/}
+                        {/*text="Loading..."*/}
+                    {/*/>*/}
+                {/*</View>*/}
+                {this.state.screen}
             </View>
         )
     }

@@ -1,8 +1,8 @@
 import React, { Component } from 'react';
-import {StyleSheet, View,Dimensions,StatusBar,Text } from 'react-native';
+import {StyleSheet, View,Dimensions,StatusBar,BackHandler } from 'react-native';
 import PropTypes from  'prop-types';
 import  {TabBar, NavigationRoute, NavBar}  from 'dcloud-mobile-rn';
-import { NavigationActions,createStackNavigator,Transitioner } from 'react-navigation';
+import { NavigationActions,createStackNavigator } from 'react-navigation';
 
 const {height:ScreenHeight} = Dimensions.get("window");
 
@@ -23,8 +23,9 @@ export default class TabRoute extends Component {
         const routeParams = {
            setNavigate: this.setNavigate.bind(this),
            back: this.returning.bind(this),
+           navigatorLoading: this.getNavigatorLoading.bind(this),
            title : this.props.tab[0].title,
-           backDelay: 500,
+           backDelay: 0,
         }
         this.state = {
             selectedTab: this.props.tab[0].path,
@@ -44,7 +45,7 @@ export default class TabRoute extends Component {
             showNavBar: true,
             routeNumber: 0,
             backDelay: routeParams.backDelay,
-            navigatorLoding: true
+            navigatorLoading: true
          };
         this.state.waiting = true;
     }
@@ -69,27 +70,27 @@ export default class TabRoute extends Component {
         this.state._navigator = navigatorRef;
     }
 
-    navigate(routeName, params) {
+    navigate(item, params) {
         //路由次数为0时返回父级页面
-        if(this.state.current.path != routeName)
+        if(this.state.current.path != item.path)
             this.state.routeNumber ++;
 
-        let item = this.getItem(routeName);
         params = {...params,...this.state.routeParams, ...{page: item.screen,parentNavigator: null,title: item.title}};
 
         if(item.childRoute || item.screen.type.displayName === 'TabRoute'){
-            this.state.navigatorLoding = false;
+            this.state.navigatorLoading = false;
             this.setState({
-                    navigatorStyle: {...this.state.navigatorStyle,...{height:'100%'}},
-                    showNavBar: false
+                navigatorStyle: {...this.state.navigatorStyle,...{height:'100%'}},
+                showNavBar: false
             });
             params.parentGoBack = this.navBack.bind(this);
             params.childInit = this.childInit.bind(this);
-            params.navigatorLoding =  this.getNavigatorLoding.bind(this);
+            params.Loading = true;
         }else {
             this.state.currentTitle = item.title;
             this.state.current = item;
         }
+        const routeName = item.path;
         this.state._navigator.dispatch(
             NavigationActions.navigate({
                 routeName,
@@ -107,12 +108,13 @@ export default class TabRoute extends Component {
                 return;
             }
         }
-        if( this.state.navigatorLoding ){
-            this.state.navigatorLoding = false;
+
+        if( this.state.navigatorLoading ){
+            this.state.navigatorLoading = false;
             this.state.routeNumber--;
             this.state.navigator.goBack();
             setTimeout(()=> {
-                this.state.navigatorLoding = true;
+                this.state.navigatorLoading = true;
             },this.state.backDelay)
         }
     }
@@ -136,7 +138,7 @@ export default class TabRoute extends Component {
                     icon={item.icon}
                     selectedIcon={item.selectedIcon}
                     selected={this.state.selectedTab === item.path}
-                    onPress={() => {this.navigate(item.path)}}
+                    onPress={() => {this.navigate(item)}}
                     badge={item.badge}
                     data-seed="logId">
                     {item.component? item.component : null}
@@ -145,22 +147,12 @@ export default class TabRoute extends Component {
         })
     }
 
-    getItem(key) {
-        let item;
-        for(_item in this.props.tab){
-            if(key === this.props.tab[_item].path){
-                item = this.props.tab[_item];
-                return item;
-            }
-        }
-        return {screen: null}
-    }
-
     //Event
     //返回事件当前层级下（这里还应包含ios的返回事件）
-    returning(navigation,title) {
+    returning(navigation,title, loading) {
+        console.log(navigation.state.routeName  + '|' + this.state.current.path.toString() + '|' + loading);
         let reParent = false;
-        if(navigation.state.routeName === this.state.current.path.toString() )
+        if(navigation.state.routeName === this.state.current.path.toString() ||  loading)
             reParent = true;
 
         this.setState({
@@ -174,11 +166,11 @@ export default class TabRoute extends Component {
 
     //子路由初始化完成
     childInit() {
-        this.state.navigatorLoding = true;
+        this.state.navigatorLoading = true;
     }
 
-    getNavigatorLoding() {
-        return this.state.navigatorLoding;
+    getNavigatorLoading() {
+        return this.state.navigatorLoading;
     }
 
     componentDidMount() {

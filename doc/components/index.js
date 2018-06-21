@@ -41,7 +41,7 @@ export default class Documents extends Component {
     getScreen() {
         return(
             <View style={{marginTop: 10}}>
-                <List renderHeader={() => 'Basic Style'} className="my-list">
+                <List  renderHeader={() => 'Basic Style'} className="my-list">
                     {this.getItem()}
                 </List>
             </View>
@@ -55,7 +55,7 @@ export default class Documents extends Component {
     getItem() {
         return componentList.map((item,i)=>{
             return (
-            <Item onClick={()=>{this._navigator(item.path)}} extra={<Text style={{fontFamily:'iconfont'}}>&#xe6a7;</Text>}>
+            <Item key={i} onClick={()=>{this._navigator(item.path)}} extra={<Text style={{fontFamily:'iconfont'}}>&#xe6a7;</Text>}>
                 <Text>{item.title}</Text>
             </Item>)
         })
