@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import {
     View,Text
 } from 'react-native';
-import  {TabRoute}  from 'dcloud-mobile';
+import  {TabRoute}  from 'dcloud-mobile-rn';
 
 export default class ChildCart extends Component {
     constructor(props) {

@@ -5,8 +5,10 @@ export default class NavigationRoute extends Component {
     constructor(props) {
         super(props);
         this.state = {
+            title: this.getparams().title,
             screen: this.getparams().page,
             back:  this.getparams().back,
+            backDelay: this.getparams().backDelay,
             listener: null,
             hardwareBackPress: null,
             setNavigate: this.getparams().setNavigate,
@@ -24,7 +26,9 @@ export default class NavigationRoute extends Component {
             back: null,
             setNavigate: null,
             childInit: null,
-            navigatorLoding: null
+            navigatorLoding: null,
+            title: null,
+            backDelay: 500
         }
     }
 
@@ -32,7 +36,7 @@ export default class NavigationRoute extends Component {
         if(this.state.childInit){
             setTimeout(()=>{
                 this.state.childInit();
-            },500)
+            },this.state.backDelay);
         }
     }
 
@@ -60,7 +64,7 @@ export default class NavigationRoute extends Component {
 
     onBack (){
         if(this.state.back)
-            this.state.back(this.props.navigation)
+            this.state.back(this.props.navigation,this.state.title)
     }
 
     render() {

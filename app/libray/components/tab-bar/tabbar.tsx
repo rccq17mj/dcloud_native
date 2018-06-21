@@ -21,7 +21,8 @@ class TabBar extends React.Component<TabBarNativeProps, any> {
         styles: TabBarStyles,
     };
     componentDidMount() {
-        this.props.getStyle( this.props.styles.tabs);
+        if(this.props)
+            this.props.getStyle( this.props.styles.tabs);
     }
     static Item: any;
     getPanes(content: boolean) {

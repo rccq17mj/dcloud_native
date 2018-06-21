@@ -25,7 +25,8 @@ var TabBar = /** @class */ (function (_super) {
         return _super !== null && _super.apply(this, arguments) || this;
     }
     TabBar.prototype.componentDidMount = function () {
-        this.props.getStyle(this.props.styles.tabs);
+        if (this.props)
+            this.props.getStyle(this.props.styles.tabs);
     };
     TabBar.prototype.getPanes = function (content) {
         var _a = this.props, tintColor = _a.tintColor, unselectedTintColor = _a.unselectedTintColor, children = _a.children;

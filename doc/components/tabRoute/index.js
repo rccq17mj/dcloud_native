@@ -1,15 +1,8 @@
 import React,  { Component }  from 'react';
-import { Text } from 'react-native';
+import { View,Text } from 'react-native';
 import  {TabRoute}  from 'dcloud-mobile-rn';
-import {Documents} from 'dcloud-mobile-doc-rn/'
 
-import Home from './main/home/';
-import User from './main/user/';
-
-import  ChildCart  from './main/cart/';
-
-
-export default class Layout extends Component {
+export default class TabRouteDoc extends Component {
     constructor(props) {
         super(props);
 
@@ -19,14 +12,14 @@ export default class Layout extends Component {
                 icon:<Text style={{fontFamily:'iconfont'}}>&#xe628;</Text>,
                 selectedIcon:<Text style={{fontFamily:'iconfont'}}>&#xe628;</Text>,
                 path: "cart1",
-                screen:  <ChildCart>Cart</ChildCart>,
+                screen:  <Text>Cart</Text>,
             },
             {
                 title: "cart2",
                 icon:<Text style={{fontFamily:'iconfont'}}>&#xe628;</Text>,
                 selectedIcon:<Text style={{fontFamily:'iconfont'}}>&#xe628;</Text>,
                 path: "cart2",
-                screen:  <ChildCart>Cart2</ChildCart>,
+                screen:  <Text>Cart2</Text>,
                 badge: 2,
             },
             {
@@ -34,7 +27,7 @@ export default class Layout extends Component {
                 icon:<Text style={{fontFamily:'iconfont'}}>&#xe628;</Text>,
                 selectedIcon:<Text style={{fontFamily:'iconfont'}}>&#xe628;</Text>,
                 path: "cart3",
-                screen: <ChildCart>Cart3</ChildCart>,
+                screen: <Text>Cart3</Text>,
                 badge: 0,
             }
         ]
@@ -43,40 +36,45 @@ export default class Layout extends Component {
             navigator: null,
             tab: [
                 {
-                    title: "首页",
+                    title: "home",
                     icon: <Text style={{fontFamily:'iconfont'}}>&#xe60c;</Text>,
                     selectedIcon: <Text style={{fontFamily:'iconfont'}}>&#xe60c;</Text>,
-                    path: "Home",
-                    screen:  <Home></Home>,
+                    path: "home",
+                    screen:  <Text>home</Text>,
                 },
                 {
-                    title: "购物车",
+                    title: "cart",
                     icon:<Text style={{fontFamily:'iconfont'}}>&#xe628;</Text>,
                     selectedIcon:<Text style={{fontFamily:'iconfont'}}>&#xe628;</Text>,
-                    path: "Cart",
-                    screen:  <TabRoute tab={cart}></TabRoute>,
+                    path: "cart",
+                    screen:  <TabRoute tab={cart} navigator={this.initCchild.bind(this)} ></TabRoute>,
                     badge: 2
                 },
                 {
-                    title: "我的",
+                    title: "user",
                     icon:<Text style={{fontFamily:'iconfont'}}>&#xe60e;</Text>,
                     selectedIcon:<Text style={{fontFamily:'iconfont'}}>&#xe60e;</Text>,
-                    path: "User",
-                    screen:  <User></User>,
-                },
-                {
-                    title: "文档",
-                    icon:<Text style={{fontFamily:'iconfont'}}>&#xe67c;</Text>,
-                    selectedIcon:<Text style={{fontFamily:'iconfont'}}>&#xe67c;</Text>,
-                    path: "Doc",
-                    screen:  <Documents></Documents>,
-                    childRoute: true
+                    path: "user",
+                    screen:  <Text>user</Text>,
                 }
             ]
         }
     }
 
+    // 路由初始化
+    initNavigator(navigator) {
+        // 跳转路由
+        // navigator('cart');
+    }
+
+    // 子路由初始化操作
+    initCchild() {
+        // navigator('cart3');
+    }
+
     render() {
-        return (<TabRoute tab={this.state.tab}></TabRoute>)
+        return (
+            <TabRoute tab={this.state.tab} navigator={this.initNavigator.bind(this)} params={this.props.params}></TabRoute>
+        )
     }
 }

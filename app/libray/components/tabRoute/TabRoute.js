@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import {StyleSheet, View,Dimensions,StatusBar,Text } from 'react-native';
 import PropTypes from  'prop-types';
-import  {TabBar, NavigationRoute, NavBar}  from 'dcloud-mobile';
+import  {TabBar, NavigationRoute, NavBar}  from 'dcloud-mobile-rn';
 import { NavigationActions,createStackNavigator,Transitioner } from 'react-navigation';
 
 const {height:ScreenHeight} = Dimensions.get("window");
@@ -22,7 +22,9 @@ export default class TabRoute extends Component {
         });
         const routeParams = {
            setNavigate: this.setNavigate.bind(this),
-           back: this.returning.bind(this)
+           back: this.returning.bind(this),
+           title : this.props.tab[0].title,
+           backDelay: 500,
         }
         this.state = {
             selectedTab: this.props.tab[0].path,
@@ -38,13 +40,16 @@ export default class TabRoute extends Component {
             _navigator: null,
             navigator: null,
             current: this.props.tab[0],
+            currentTitle: this.props.tab[0].title,
             showNavBar: true,
             routeNumber: 0,
+            backDelay: routeParams.backDelay,
             navigatorLoding: true
          };
         this.state.waiting = true;
     }
 
+    //计算并排除vabBar和tabBar
     getTabBarStyle(style) {
         if(this.state.navigatorStyle.height == 0) {
             const tabstye = StyleSheet.flatten(style);
@@ -66,10 +71,11 @@ export default class TabRoute extends Component {
 
     navigate(routeName, params) {
         //路由次数为0时返回父级页面
-        this.state.routeNumber ++;
+        if(this.state.current.path != routeName)
+            this.state.routeNumber ++;
 
         let item = this.getItem(routeName);
-        params = {...params,...this.state.routeParams, ...{page: item.screen,parentNavigator: null}};
+        params = {...params,...this.state.routeParams, ...{page: item.screen,parentNavigator: null,title: item.title}};
 
         if(item.childRoute || item.screen.type.displayName === 'TabRoute'){
             this.state.navigatorLoding = false;
@@ -80,9 +86,10 @@ export default class TabRoute extends Component {
             params.parentGoBack = this.navBack.bind(this);
             params.childInit = this.childInit.bind(this);
             params.navigatorLoding =  this.getNavigatorLoding.bind(this);
-        }else
+        }else {
+            this.state.currentTitle = item.title;
             this.state.current = item;
-
+        }
         this.state._navigator.dispatch(
             NavigationActions.navigate({
                 routeName,
@@ -100,12 +107,18 @@ export default class TabRoute extends Component {
                 return;
             }
         }
-        this.state.routeNumber--;
-        this.state.navigator.goBack();
+        if( this.state.navigatorLoding ){
+            this.state.navigatorLoding = false;
+            this.state.routeNumber--;
+            this.state.navigator.goBack();
+            setTimeout(()=> {
+                this.state.navigatorLoding = true;
+            },this.state.backDelay)
+        }
     }
 
     getNavBar() {
-        let navBar = this.state.showNavBar? this.props.navBar || this.props.navBar === null? this.props.navBar : <NavBar title={this.state.current.title}></NavBar> : null;
+        let navBar = this.state.showNavBar? this.props.navBar || this.props.navBar === null? this.props.navBar : <NavBar title={this.state.currentTitle}></NavBar> : null;
 
         if(navBar != null){
             navBar = React.cloneElement(navBar,{back: this.navBack.bind(this)})
@@ -117,7 +130,7 @@ export default class TabRoute extends Component {
     getTabBar() {
         return  this.props.tab.map((item,i) => {
             return (
-                <TabBar.Item
+                item.hide? null : <TabBar.Item
                     title={item.title}
                     key={item.path}
                     icon={item.icon}
@@ -145,16 +158,17 @@ export default class TabRoute extends Component {
 
     //Event
     //返回事件当前层级下（这里还应包含ios的返回事件）
-    returning(navigation) {
+    returning(navigation,title) {
         let reParent = false;
         if(navigation.state.routeName === this.state.current.path.toString() )
             reParent = true;
 
         this.setState({
             navigatorStyle: reParent? {...this.state.navigatorStyle, ...this.state.styleBuff} : this.state.navigatorStyle,
-            showNavBar: reParent? {...this.state.navigatorStyle, ...this.state.styleBuff} : this.state.navigatorStyle,
+            showNavBar: reParent? true : this.state.showNavBar,
             selectedTab: navigation.state.routeName,
-            navigator: navigation
+            navigator: navigation,
+            currentTitle: title? title : this.state.currentTitle
         })
     }
 
@@ -186,7 +200,7 @@ export default class TabRoute extends Component {
                         barStyle={'default'} //可以取值 'default', 'light-content', 'dark-content'它的默认是default,
                     />
                 }
-                <View style={{width:"100%",position:'absolute',bottom:0}}>
+                <View style={{width:this.state.hidden? 0 : "100%",position:'absolute',bottom:0}}>
                     <TabBar unselectedTintColor="#949494" barTintColor="white" hidden={this.state.hidden} getStyle={this.getTabBarStyle.bind(this)}>
                         {this.getTabBar()}
                     </TabBar>
@@ -245,7 +259,10 @@ TabRoute.propTypes = {
     // 可获取到navigator对象  navigator={this.setNavigator.bind(this)}
     // 父组件componentDidUpdate()中完成跳转操作
     navigator: PropTypes.func,
-    // 支持传递一个StatuBar组件 <StatusBar />
+    // 支持传递一个自定义StatuBar组件 <StatusBar />
     statusBar: PropTypes.element,
-    navBar: PropTypes.element
+    // 支持传递一个自定义NavBar组件 <NavBar />
+    navBar: PropTypes.element,
+    // 页面嵌套路由必须将父组件的params传递给路由才能实现NavBar的返回功能  <TabRoute ... params={this.props.params} />
+    params: PropTypes.object
 }

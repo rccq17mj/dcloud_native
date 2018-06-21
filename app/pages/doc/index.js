@@ -1,0 +1,1 @@
+export { default as Documents } from './components/index';
