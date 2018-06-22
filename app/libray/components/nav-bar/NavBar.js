@@ -48,6 +48,6 @@ export default class NavBar extends Component {
 }
 
 NavBar.propTypes = {
-    // 接收返回事件
+    // 接收返回事件,如果要自定义navBar可以直接重写以一个navBar传递给TabRoute，通过注入的this.props.back();调用返回事件
     touchBack: PropTypes.func
 }

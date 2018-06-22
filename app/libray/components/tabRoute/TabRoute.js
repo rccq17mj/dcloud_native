@@ -11,6 +11,7 @@ export default class TabRoute extends Component {
         super(props);
 
         let routeList = {};
+        let guidePage = {};
         this.props.tab.map((item)=>{
             if(item.screen){
                 const key = item.path;
@@ -18,19 +19,17 @@ export default class TabRoute extends Component {
                     screen: NavigationRoute,
                     navigationOptions: item.navigationOptions? item.navigationOptions : {header:null,  tabBarVisible: false}
                 }
+                guidePage[key] = item
             }
         });
         const routeParams = {
            setNavigate: this.setNavigate.bind(this),
            back: this.returning.bind(this),
-           navigatorLoading: this.getNavigatorLoading.bind(this),
            title : this.props.tab[0].title,
-           backDelay: 0,
         }
         this.state = {
             selectedTab: this.props.tab[0].path,
             hidden: this.props.hidden?this.props.hidden : false,
-            fullScreen: false,
             navigatorStyle:{...this.props.navigatorStyle,...{height: 0,top: 0,position:'absolute',width:'100%'}},
             styleBuff: null,
             routeParams: routeParams,
@@ -38,85 +37,55 @@ export default class TabRoute extends Component {
                     ...this.props.StackNavigatorConfigs,
                     ...{initialRouteParams: {...routeParams,...{page: this.props.tab[0].screen? this.props.tab[0].screen : null}}}
             }) : null,
+            guidePage: guidePage,
             _navigator: null,
             navigator: null,
+            preNavigator: null,
             current: this.props.tab[0],
             currentTitle: this.props.tab[0].title,
             showNavBar: true,
             routeNumber: 0,
-            backDelay: routeParams.backDelay,
-            navigatorLoading: true
          };
-        this.state.waiting = true;
     }
 
-    //计算并排除vabBar和tabBar
-    getTabBarStyle(style) {
-        if(this.state.navigatorStyle.height == 0) {
-            const tabstye = StyleSheet.flatten(style);
-            this.setState({
-                navigatorStyle: {...this.state.navigatorStyle ,
-                    ...{height: ScreenHeight - StatusBar.currentHeight - tabstye.height}},
-                styleBuff: {height: ScreenHeight - StatusBar.currentHeight - tabstye.height}
-            });
-        }
-    }
-
-    setNavigate(navigator) {
-        this.state.navigator = navigator;
+    componentDidMount() {
+        if(this.props.navigator && typeof(this.props.navigator) === 'function')
+            this.props.navigator(this.navigate.bind(this));
     }
 
     setTopLevelNavigator(navigatorRef) {
         this.state._navigator = navigatorRef;
     }
 
-    navigate(item, params) {
-        //路由次数为0时返回父级页面
-        if(this.state.current.path != item.path)
+    /**
+     * 路由跳转
+     * @param item
+     * @param params
+     * @returns {*}
+     */
+    navigate(routeName, params) {
+        let item = this.state.guidePage[routeName];
+        if(this.state.current.path != routeName)
             this.state.routeNumber ++;
 
         params = {...params,...this.state.routeParams, ...{page: item.screen,parentNavigator: null,title: item.title}};
-
-        if(item.childRoute || item.screen.type.displayName === 'TabRoute'){
-            this.state.navigatorLoading = false;
-            this.setState({
-                navigatorStyle: {...this.state.navigatorStyle,...{height:'100%'}},
-                showNavBar: false
-            });
-            params.parentGoBack = this.navBack.bind(this);
-            params.childInit = this.childInit.bind(this);
-            params.Loading = true;
-        }else {
+        if(item.screen.type.displayName === 'TabRoute' || item.childRoute )
+            this.navigateChild(params);
+        else {
             this.state.currentTitle = item.title;
             this.state.current = item;
         }
-        const routeName = item.path;
+        this.dispatchNavigate(routeName, params);
+        return item;
+    }
+
+    dispatchNavigate(routeName,params){
         this.state._navigator.dispatch(
             NavigationActions.navigate({
                 routeName,
                 params,
             })
         );
-        return item;
-    }
-
-    navBack() {
-        if(this.props.params && this.state.routeNumber <= 0){
-            this.state.routeNumber = 0;
-            if(this.props.params.parentGoBack){
-                this.props.params.parentGoBack();
-                return;
-            }
-        }
-
-        if( this.state.navigatorLoading ){
-            this.state.navigatorLoading = false;
-            this.state.routeNumber--;
-            this.state.navigator.goBack();
-            setTimeout(()=> {
-                this.state.navigatorLoading = true;
-            },this.state.backDelay)
-        }
     }
 
     getNavBar() {
@@ -138,7 +107,7 @@ export default class TabRoute extends Component {
                     icon={item.icon}
                     selectedIcon={item.selectedIcon}
                     selected={this.state.selectedTab === item.path}
-                    onPress={() => {this.navigate(item)}}
+                    onPress={() => {this.navigate(item.path)}}
                     badge={item.badge}
                     data-seed="logId">
                     {item.component? item.component : null}
@@ -147,37 +116,102 @@ export default class TabRoute extends Component {
         })
     }
 
-    //Event
-    //返回事件当前层级下（这里还应包含ios的返回事件）
-    returning(navigation,title, loading) {
-        console.log(navigation.state.routeName  + '|' + this.state.current.path.toString() + '|' + loading);
+    /**
+     * 调整视图区域位置
+     * @param style
+     */
+    getTabBarStyle(style) {
+        if(this.state.navigatorStyle.height == 0) {
+            const tabstye = StyleSheet.flatten(style);
+            this.setState({
+                navigatorStyle: {...this.state.navigatorStyle ,
+                    ...{height: ScreenHeight - StatusBar.currentHeight - tabstye.height}},
+                styleBuff: {height: ScreenHeight - StatusBar.currentHeight - tabstye.height}
+            });
+        }
+    }
+
+    /**
+     * 修改视图
+     * @param navigation
+     * @param reParent 是否从全屏恢复原有布局，一般是自路由切换回父路由时
+     * @param title nabBar的标题
+     */
+    changeLayout(navigation, reParent, title){
+        this.setState(preState => {
+            return {
+                ...preState,
+                ...{
+                    navigatorStyle: reParent? {...this.state.navigatorStyle, ...this.state.styleBuff} : this.state.navigatorStyle,
+                    showNavBar: reParent? true : this.state.showNavBar,
+                    selectedTab: navigation.state.routeName,
+                    currentTitle: title? title : this.state.currentTitle
+                }
+            }
+        });
+        this.setNavigate(navigation);
+    }
+
+    /**
+     * 含子路由的页面修改布局方式
+     * @param params
+     */
+    navigateChild(params) {
+        this.setState({
+            navigatorStyle: {...this.state.navigatorStyle,...{height:'100%'}},
+            showNavBar: false
+        });
+        params.parentGoBack = this.navBack.bind(this);
+        params.initChild = this.initChild.bind(this);
+        params.parent = true;
+    }
+
+    /**事件*/
+
+    /**
+     * 路由回调，获取路由的navigator
+     * @param navigator
+     */
+    setNavigate(navigator) {
+        this.state.preNavigator =  this.state.navigator;
+        this.state.navigator = navigator;
+    }
+
+    /**
+     * 监听android返回
+     * @param navigation
+     * @param title
+     * @param parent
+     */
+    returning(navigation,title, parent) {
         let reParent = false;
-        if(navigation.state.routeName === this.state.current.path.toString() ||  loading)
+        if(navigation.state.routeName === this.state.current.path.toString() ||  parent)
             reParent = true;
 
-        this.setState({
-            navigatorStyle: reParent? {...this.state.navigatorStyle, ...this.state.styleBuff} : this.state.navigatorStyle,
-            showNavBar: reParent? true : this.state.showNavBar,
-            selectedTab: navigation.state.routeName,
-            navigator: navigation,
-            currentTitle: title? title : this.state.currentTitle
-        })
+        this.changeLayout(navigation,reParent,title);
     }
 
-    //子路由初始化完成
-    childInit() {
-        this.state.navigatorLoading = true;
+    /**
+     * navBar的返回事件
+     */
+    navBack() {
+        if(this.props.params && this.state.routeNumber <= 0){
+            this.state.routeNumber = 0;
+            if(this.props.params.parentGoBack){
+                this.props.params.parentGoBack();
+                return;
+            }
+        }
+
+        this.state.routeNumber--;
+        this.state.navigator.goBack();
+        this.changeLayout(this.state.navigator , true);
     }
 
-    getNavigatorLoading() {
-        return this.state.navigatorLoading;
-    }
-
-    componentDidMount() {
-        // 将navigator给父组件
-        if(this.props.navigator && typeof(this.props.navigator) === 'function')
-            this.props.navigator(this.navigate.bind(this));
-    }
+    /**
+     * 含有子路由的页面初始化完成
+     */
+    initChild() {}
 
     render() {
         return (

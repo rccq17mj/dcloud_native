@@ -4,22 +4,11 @@ import { List } from 'antd-mobile-rn';
 import  {TabRoute}  from 'dcloud-mobile-rn';
 
 const Item = List.Item;
-const Brief = Item.Brief;
-//component
-import TabRouteDoc from './tabRoute/'
+import componentList from './catalog'
 
 /**
  * 组件使用文档
  * */
-
-const componentList = [
-    {
-        title: "TabRoute",
-        path: "doc/TabRoute",
-        screen:  <TabRouteDoc></TabRouteDoc>,
-        childRoute: true //全屏展示
-    }
-]
 export default class Documents extends Component {
 
     constructor(props) {
@@ -32,28 +21,26 @@ export default class Documents extends Component {
                     icon: <Text style={{fontFamily:'iconfont'}}>&#xe60c;</Text>,
                     selectedIcon: <Text style={{fontFamily:'iconfont'}}>&#xe60c;</Text>,
                     path: "documents_component",
-                    screen:  this.getScreen(),
+                    screen: <View style={{marginTop: 55}}>{this.getScreen()}</View>,
                 }
             ].concat(componentList)
         }
     }
 
     getScreen() {
-        return(
-            <View style={{marginTop: 10}}>
-                <List  renderHeader={() => 'Basic Style'} className="my-list">
-                    {this.getItem()}
-                </List>
-            </View>
-        )
+        return Object.keys(componentList).map((item, index) => {
+            return <List  renderHeader={() => item } className="my-list">
+                {componentList[item]? this.getItem(componentList[item]) : null}
+            </List>
+        });
     }
 
     /**
      * 根据 componentList 创建组件文档路由
      * @returns {U[]|Array}
      */
-    getItem() {
-        return componentList.map((item,i)=>{
+    getItem(item) {
+        return item.map((item,i)=>{
             return (
             <Item key={i} onClick={()=>{this._navigator(item.path)}} extra={<Text style={{fontFamily:'iconfont'}}>&#xe6a7;</Text>}>
                 <Text>{item.title}</Text>

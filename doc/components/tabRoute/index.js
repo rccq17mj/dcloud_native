@@ -47,7 +47,7 @@ export default class TabRouteDoc extends Component {
                     icon:<Text style={{fontFamily:'iconfont'}}>&#xe628;</Text>,
                     selectedIcon:<Text style={{fontFamily:'iconfont'}}>&#xe628;</Text>,
                     path: "cart",
-                    screen:  <TabRoute tab={cart} navigator={this.initCchild.bind(this)} ></TabRoute>,
+                    screen:  <TabRoute tab={cart} navigator={this.initChild.bind(this)} ></TabRoute>,
                     badge: 2
                 },
                 {
@@ -68,7 +68,7 @@ export default class TabRouteDoc extends Component {
     }
 
     // 子路由初始化操作
-    initCchild() {
+    initChild() {
         // navigator('cart3');
     }
 
